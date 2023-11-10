@@ -1,3 +1,4 @@
+{-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE GADTs #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE RankNTypes #-}
@@ -11,14 +12,13 @@ module Cardano.TxSubmit.Web
   ) where
 
 import           Cardano.Api (AllegraEra, AnyCardanoEra (AnyCardanoEra),
-                   AnyConsensusMode (AnyConsensusMode), AnyConsensusModeParams (..), AsType (..),
+                   AsType (..), ConsensusModeParams (..),
                    CardanoEra (..), Error (..), FromSomeType (..), HasTypeProxy (AsType),
                    InAnyCardanoEra (..),
                    LocalNodeConnectInfo (LocalNodeConnectInfo, localConsensusModeParams, localNodeNetworkId, localNodeSocketPath),
                    NetworkId, SerialiseAsCBOR (..), ShelleyEra, SocketPath, ToJSON, Tx, TxId (..),
-                   TxInMode (TxInMode),
-                   TxValidationErrorInMode (TxValidationEraMismatch, TxValidationErrorInMode),
-                   consensusModeOnly, getTxBody, getTxId, submitTxToNodeLocal, toEraInMode)
+                   TxInMode (TxInMode), TxValidationErrorInCardanoMode (..),
+                   getTxBody, getTxId, submitTxToNodeLocal, IsCardanoEra (..))
 
 import           Cardano.Binary (DecoderError (..))
 import           Cardano.BM.Trace (Trace, logInfo)
@@ -27,7 +27,7 @@ import           Cardano.TxSubmit.Metrics (TxSubmitMetrics (..))
 import           Cardano.TxSubmit.Rest.Types (WebserverConfig (..), toWarpSettings)
 import qualified Cardano.TxSubmit.Rest.Web as Web
 import           Cardano.TxSubmit.Types (EnvSocketError (..), RawCborDecodeError (..),
-                   TxCmdError (TxCmdEraConsensusModeMismatch, TxCmdTxReadError, TxCmdTxSubmitError, TxCmdTxSubmitErrorEraMismatch),
+                   TxCmdError (TxCmdTxReadError, TxCmdTxSubmitError, TxCmdTxSubmitErrorEraMismatch),
                    TxSubmitApi, TxSubmitApiRecord (..), TxSubmitWebApiError (TxSubmitFail),
                    renderTxCmdError)
 import           Cardano.TxSubmit.Util (logException)
@@ -74,7 +74,7 @@ runTxSubmitServer
   :: Trace IO Text
   -> TxSubmitMetrics
   -> WebserverConfig
-  -> AnyConsensusModeParams
+  -> ConsensusModeParams
   -> NetworkId
   -> SocketPath
   -> IO ()
@@ -86,7 +86,7 @@ runTxSubmitServer trace metrics webserverConfig protocol networkId socketPath = 
 txSubmitApp
   :: Trace IO Text
   -> TxSubmitMetrics
-  -> AnyConsensusModeParams
+  -> ConsensusModeParams
   -> NetworkId
   -> SocketPath
   -> Application
@@ -128,21 +128,17 @@ readByteStringTx = firstExceptT TxCmdTxReadError . hoistEither . deserialiseAnyO
 txSubmitPost
   :: Trace IO Text
   -> TxSubmitMetrics
-  -> AnyConsensusModeParams
+  -> ConsensusModeParams
   -> NetworkId
   -> SocketPath
   -> ByteString
   -> Handler TxId
-txSubmitPost trace metrics (AnyConsensusModeParams cModeParams) networkId socketPath txBytes =
+txSubmitPost trace metrics p@(CardanoModeParams cModeParams) networkId socketPath txBytes =
   handle $ do
     InAnyCardanoEra era tx <- readByteStringTx txBytes
-    let cMode = AnyConsensusMode $ consensusModeOnly cModeParams
-    eraInMode <- hoistMaybe
-                   (TxCmdEraConsensusModeMismatch cMode (AnyCardanoEra era))
-                   (toEraInMode era $ consensusModeOnly cModeParams)
-    let txInMode = TxInMode tx eraInMode
+    let txInMode = TxInMode era tx
         localNodeConnInfo = LocalNodeConnectInfo
-                              { localConsensusModeParams = cModeParams
+                              { localConsensusModeParams = p
                               , localNodeNetworkId = networkId
                               , localNodeSocketPath = socketPath
                               }
@@ -154,7 +150,7 @@ txSubmitPost trace metrics (AnyConsensusModeParams cModeParams) networkId socket
         return $ getTxId (getTxBody tx)
       Net.Tx.SubmitFail reason ->
         case reason of
-          TxValidationErrorInMode err _eraInMode -> left . TxCmdTxSubmitError . T.pack $ show err
+          TxValidationErrorInCardanoMode err -> left . TxCmdTxSubmitError . T.pack $ show err
           TxValidationEraMismatch mismatchErr -> left $ TxCmdTxSubmitErrorEraMismatch mismatchErr
     where
       handle :: ExceptT TxCmdError IO TxId -> Handler TxId

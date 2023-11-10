@@ -139,7 +139,7 @@ run RunOpts
 
   return ()
  where
-  getConsensusMode :: SecurityParam -> NodeProtocolConfiguration -> ConsensusModeParams CardanoMode
+  getConsensusMode :: SecurityParam -> NodeProtocolConfiguration -> ConsensusModeParams
   getConsensusMode (SecurityParam k) ncProtocolConfig =
     case ncProtocolConfig of
       NodeProtocolConfigurationCardano{} ->

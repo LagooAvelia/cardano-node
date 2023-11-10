@@ -480,6 +480,7 @@ handleSimpleNode blockType runP p2pMode tracers nc onKernel = do
               , srnEnableInDevelopmentVersions  = ncExperimentalProtocolsEnabled nc
               , srnTraceChainDB                 = chainDBTracer tracers
               , srnMaybeMempoolCapacityOverride = ncMaybeMempoolCapacityOverride nc
+              , srnChainSyncTimeout             = Nothing
               }
       DisabledP2PMode -> do
         nt <- TopologyNonP2P.readTopologyFileOrError nc
@@ -528,6 +529,7 @@ handleSimpleNode blockType runP p2pMode tracers nc onKernel = do
               , srnDiffusionTracersExtra       = diffusionTracersExtra tracers
               , srnEnableInDevelopmentVersions = ncExperimentalProtocolsEnabled nc
               , srnTraceChainDB                = chainDBTracer tracers
+              , srnChainSyncTimeout            = Nothing
               , srnMaybeMempoolCapacityOverride = ncMaybeMempoolCapacityOverride nc
               }
  where

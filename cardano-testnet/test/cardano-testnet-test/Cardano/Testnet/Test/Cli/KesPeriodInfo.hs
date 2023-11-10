@@ -66,8 +66,7 @@ hprop_kes_period_info = H.integrationRetryWorkspace 2 "kes-period-info" $ \tempA
                           , cardanoNodeEra = AnyCardanoEra era -- TODO: We should only support the latest era and the upcoming era
                           }
 
-  sbe <- case cardanoEraStyle era of
-           ShelleyBasedEra era' -> return era'
+  let sbe = shelleyBasedEra @BabbageEra
 
   runTime@TestnetRuntime { testnetMagic } <- cardanoTestnet cTestnetOptions conf
 

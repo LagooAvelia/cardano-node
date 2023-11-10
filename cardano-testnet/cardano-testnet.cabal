@@ -34,8 +34,8 @@ library
   build-depends:        aeson
                       , ansi-terminal
                       , bytestring
-                      , cardano-api ^>= 8.29
-                      , cardano-cli ^>= 8.13
+                      , cardano-api ^>= 8.31
+                      , cardano-cli ^>= 8.15
                       , cardano-crypto-class
                       , cardano-crypto-wrapper
                       , cardano-ledger-alonzo
@@ -55,7 +55,7 @@ library
                       , hedgehog-extras ^>= 0.4.7.0
                       , mtl
                       , optparse-applicative-fork
-                      , ouroboros-network ^>= 0.9.1
+                      , ouroboros-network ^>= 0.10
                       , process
                       , resourcet
                       , safe-exceptions

@@ -51,6 +51,7 @@ executable cardano-node-chairman
                       , io-classes
                       , optparse-applicative-fork
                       , ouroboros-consensus
+                      , ouroboros-consensus-cardano
                       , ouroboros-network-api
                       , ouroboros-network-protocols
                       , strict-stm
@@ -88,5 +89,5 @@ test-suite chairman-tests
   ghc-options:          -threaded -rtsopts -with-rtsopts=-N -with-rtsopts=-T
 
   build-tool-depends:   cardano-node:cardano-node
-                      , cardano-cli:cardano-cli ^>= 8.13
+                      , cardano-cli:cardano-cli ^>= 8.15
                       , cardano-node-chairman:cardano-node-chairman

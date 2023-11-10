@@ -13,8 +13,8 @@ repository cardano-haskell-packages
 -- See CONTRIBUTING for information about these, including some Nix commands
 -- you need to run if you change them
 index-state:
-  , hackage.haskell.org 2023-09-01T22:19:16Z
-  , cardano-haskell-packages 2023-10-31T17:10:09Z
+  , hackage.haskell.org 2023-11-09T23:50:15Z
+  , cardano-haskell-packages 2023-11-15T14:43:10Z
 
 packages:
   cardano-git-rev
@@ -56,3 +56,20 @@ package bitvec
 -- temporary! Please read the section in CONTRIBUTING about updating dependencies.
 
 -- `smtp-mail` should depend on `crypton-connection` rather than `connection`!
+
+source-repository-package
+  type: git
+  location: https://github.com/input-output-hk/cardano-api
+  tag: fa8cf407cbce04d55b88feb91ee98b313932aa92
+  --sha256: 1ycczk06z84xxfbrg8faln8m6cny1bxbx19lvj6fdx01lyswibyg
+  subdir:
+    cardano-api
+    cardano-api-gen
+
+source-repository-package
+  type: git
+  location: https://github.com/input-output-hk/cardano-cli
+  tag: 29374f199fd80cc13a951e8cef4d0b17bbe0cea2
+  --sha256: 0wzgw3sr9zi809sq1p3x1kghcw217qyfw8m8b2v77jcn29yimkb7
+  subdir:
+    cardano-cli
